@@ -1,0 +1,5 @@
+eval $(opam env)
+# Use the option flag obs local, because otherwise it won't be possible to check the correctness of some litmus tests as they only do writes
+diy7 -arch C -obs local
+
+diy7 -conf ARCH.conf

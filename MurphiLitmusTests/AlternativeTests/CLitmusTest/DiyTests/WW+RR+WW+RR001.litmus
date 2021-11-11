@@ -1,0 +1,35 @@
+C WW+RR+WW+RR001
+"Coi Rfe FenceReldRR Fre Coi Rfe FenceReldRR Fre"
+Cycle=Rfe FenceReldRR Fre Coi Rfe FenceReldRR Fre Coi
+Relax=ACFenceReldRR
+Safe=Fre Coi
+Generator=diy7 (version 7.56)
+Prefetch=1:x=F,1:y=T,3:y=F,3:x=T
+Com=Rf Fr Rf Fr
+Orig=Coi Rfe FenceReldRR Fre Coi Rfe FenceReldRR Fre
+
+{}
+
+P0 (volatile int* x) {
+  *x = 1;
+  *x = 2;
+}
+
+P1 (volatile int* y,volatile int* x) {
+  int r0 = *x;
+  atomic_thread_fence(memory_order_release);
+  int r1 = *y;
+}
+
+P2 (volatile int* y) {
+  *y = 1;
+  *y = 2;
+}
+
+P3 (volatile int* y,volatile int* x) {
+  int r0 = *y;
+  atomic_thread_fence(memory_order_release);
+  int r1 = *x;
+}
+
+exists (x=2 /\ y=2 /\ 1:r0=2 /\ 1:r1=0 /\ 3:r0=2 /\ 3:r1=0)

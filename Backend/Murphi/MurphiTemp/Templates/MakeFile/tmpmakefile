@@ -1,0 +1,25 @@
+# TARGET = $0$
+# COMPACTION_FLAG = $1$
+# MURPHI_PATH = $2$
+
+TARGET = $0$
+
+MURPHIPATH = $2$
+INCLUDEPATH = ${MURPHIPATH}/include
+SRCPATH = ${MURPHIPATH}/src
+# ARCH NATIVE DEACTIVED -march=native
+CFLAGS = -O3 # Native architecture currently disabled due to verification server arch
+
+all: ${TARGET}
+
+${TARGET}: ${TARGET}.cpp
+	g++ ${CFLAGS} -o ${TARGET} ${TARGET}.cpp -I${INCLUDEPATH}
+
+# Hash compaction flags
+# -b -c
+${TARGET}.cpp: ${TARGET}.m
+	${SRCPATH}/mu $1$ ${TARGET}.m
+
+.PHONY: clean
+clean:
+	-rm -f ${TARGET} SSP_${TARGET} *.cpp

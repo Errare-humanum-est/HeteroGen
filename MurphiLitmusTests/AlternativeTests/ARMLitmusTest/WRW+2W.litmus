@@ -1,0 +1,18 @@
+ARM WRW
+"Rfe PodRW Coe PodWW Coe"
+Generator=diyone7 (version 7.56)
+Prefetch=1:x=F,1:y=W,2:y=F,2:x=W
+Com=Rf Co Co
+Orig=Rfe PodRW Coe PodWW Coe
+{
+%x0=x;
+%x1=x; %y1=y;
+%y2=y; %x2=x;
+}
+ P0           | P1           | P2           ;
+ MOV R0,#2    | LDR R0,[%x1] | MOV R0,#2    ;
+ STR R0,[%x0] | MOV R1,#1    | STR R0,[%y2] ;
+              | STR R1,[%y1] | MOV R1,#1    ;
+              | LDR R2,[%y1] | STR R1,[%x2] ;
+              |              | LDR R2,[%x2] ;
+exists (1:R2=2 /\ 1:R0=2 /\ 2:R2=2)

@@ -1,0 +1,1 @@
+g_monitor_store: GlobalStoreMonitor;

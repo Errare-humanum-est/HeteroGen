@@ -1,0 +1,233 @@
+# NrCaches 2
+
+
+Network { Ordered fwd;    //FwdGetS, FwdGetM, Inv, PutAck
+          Ordered resp; // Data, InvAck
+          Ordered req;   //GetS, GetM, PutM
+          };
+
+Cache {
+    State I;
+    Data cl;
+} set[NrCaches] cache;
+
+Directory {
+    State V;
+    Data cl;
+} directory;
+
+Message Request{};
+
+Message Ack{};
+
+Message Resp{
+    Data cl;
+};
+
+Architecture cache {
+
+    Stable{I, VC, VD}
+
+    // I ////////////////////////////////////////////////////////
+    Process(I, load, State){
+        msg = Request(GetV, ID, directory.ID);
+        req.send(msg);
+
+        await{
+            when GetV_Ack:
+                cl=GetV_Ack.cl;
+                State = VC;
+                load;
+                break;
+        }
+    }
+
+    Process(I, store, State){
+        msg = Request(GetV, ID, directory.ID);
+        req.send(msg);
+
+        await{
+            when GetV_Ack:
+                cl=GetV_Ack.cl;
+                State = VD;
+                store;
+                break;
+        }
+    }
+
+    Process(I, acquire, State){
+        msg = Request(GetV, ID, directory.ID);
+        req.send(msg);
+
+        await{
+            when GetV_Ack:
+                cl=GetV_Ack.cl;
+                Event(acq_event);
+                load;
+                State = VC;
+                break;
+        }
+    }
+
+    Process(I, release, State){
+        Event(rel_event);
+
+        msg = Request(GetR, ID, directory.ID);
+        req.send(msg);
+
+        await{
+            when GetR_Ack:
+                cl=GetR_Ack.cl;
+                store;
+                msg = Resp(PutR, ID, directory.ID, cl);
+                resp.send(msg);
+
+                await{
+                    when PutR_Ack:
+                        State = VC;
+                        break;
+                }
+        }
+    }
+
+    Process(I, acq_event, I){
+        acq_event;
+    }
+    Process(I, rel_event, I){
+        rel_event;
+    }
+
+    // VC ////////////////////////////////////////////////////////
+    Process(VC, load, VC){}
+
+    Process(VC, store, VD){}
+
+    Process(VC, evict, I){}
+
+    Process(VC, acquire, State){
+        msg = Request(GetV, ID, directory.ID);
+        req.send(msg);
+
+        await{
+            when GetV_Ack:
+                cl=GetV_Ack.cl;
+                Event(acq_event);
+                load;
+                State = VC;
+                break;
+        }
+    }
+
+    Process(VC, release, State){
+        Event(rel_event);
+        store;
+        msg = Resp(PutV, ID, directory.ID, cl);
+        req.send(msg);
+
+        await{
+            when PutV_Ack:
+                State = VC;
+                break;
+        }
+
+
+    }
+
+    Process(VC, acq_event, I){
+        acq_event;
+    }
+    Process(VC, rel_event, VC){
+        rel_event;
+    }
+
+    // V ////////////////////////////////////////////////////////
+    Process(VD, load, VD){}
+
+    Process(VD, store, VD){}
+
+    Process(VD, evict, State){
+        msg = Resp(PutV, ID, directory.ID, cl);
+        req.send(msg);
+
+        await{
+            when PutV_Ack:
+                State = I;
+                break;
+        }
+    }
+
+    Process(VD, acquire, State){
+        msg = Request(GetV, ID, directory.ID);
+        req.send(msg);
+
+        await{
+            when GetV_Ack:
+                cl=GetV_Ack.cl;
+                Event(acq_event);
+                load;
+                State = VC;
+                break;
+        }
+    }
+
+    Process(VD, release, State){
+        Event(rel_event);
+        store;
+        msg = Resp(PutV, ID, directory.ID, cl);
+        req.send(msg);
+
+        await{
+            when PutV_Ack:
+                State = VC;
+                break;
+        }
+
+
+    }
+
+    Process(VD, acq_event, VD){
+        acq_event;
+    }
+
+    Process(VD, rel_event, State){
+        msg = Resp(PutV, ID, directory.ID, cl);
+        req.send(msg);
+
+        await{
+            when PutV_Ack:
+                rel_event;
+                State = I;
+                break;
+        }
+    }
+
+}
+
+Architecture directory {
+
+    Stable{V}
+    // V ////////////////////////////////////////////////////////
+    Process(V, GetV){
+       msg = Resp(GetV_Ack, ID, GetV.src, cl);
+       resp.send(msg);
+    }
+
+    Process(V, GetR, State){
+       msg = Resp(GetR_Ack, ID, GetR.src, cl);
+       resp.send(msg);
+       await{
+            when PutR:
+               msg = Ack(PutR_Ack, ID, PutR.src);
+               fwd.send(msg);
+               cl = PutR.cl;
+               State = V;
+               break;
+       }
+    }
+
+    Process(V, PutV, V){
+       msg = Ack(PutV_Ack, ID, PutV.src);
+       fwd.send(msg);
+       cl = PutV.cl;
+    }
+}

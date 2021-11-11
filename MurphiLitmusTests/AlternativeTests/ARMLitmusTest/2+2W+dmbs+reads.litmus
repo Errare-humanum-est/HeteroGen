@@ -1,0 +1,19 @@
+ARM 2+2W+dmbs
+"DMBdWW Coe DMBdWW Coe"
+Generator=diyone7 (version 7.56)
+Prefetch=2:x=F,2:y=W,3:y=F,3:x=W
+Com=Co Co
+Orig=DMBdWW Coe DMBdWW Coe
+{
+%x0=x;
+%y1=y;
+%x2=x; %y2=y;
+%y3=y; %x3=x;
+}
+ P0           | P1           | P2           | P3           ;
+ LDR R0,[%x0] | LDR R0,[%y1] | MOV R0,#2    | MOV R0,#2    ;
+ LDR R1,[%x0] | LDR R1,[%y1] | STR R0,[%x2] | STR R0,[%y3] ;
+              |              | DMB          | DMB          ;
+              |              | MOV R1,#1    | MOV R1,#1    ;
+              |              | STR R1,[%y2] | STR R1,[%x3] ;
+~exists (0:R0=1 /\ 0:R1=2 /\ 1:R0=1 /\ 1:R1=2)

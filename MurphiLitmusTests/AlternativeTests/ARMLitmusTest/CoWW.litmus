@@ -1,0 +1,9 @@
+ARM CoWW ()
+"CoWW"
+{
+P0:R5=x; P0:R1=1; P0:R2=2;
+}
+P0           ;
+str R1,R5 ;
+str R2,R5 ;
+~exists (x=1)

@@ -1,0 +1,12 @@
+ARM CoRR1 ()
+"CoRR1"
+Prefetch=1:x=T
+{
+  P0:R5=x ; P0:R2=2 ; x=1 ;
+  P1:R5=x ;
+}
+
+P0        | P1           ;
+str R2,R5 | ldr R1,R5 ;
+          | ldr R2,R5 ;
+~exists (P1:R1=2 /\ P1:R2=1)

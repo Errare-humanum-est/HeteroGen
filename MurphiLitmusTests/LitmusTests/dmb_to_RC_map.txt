@@ -1,0 +1,6 @@
+No Fence        DMB         Release
+PodWW       =>  DMBdWW  =>  PodWW L
+PodWR       =>  DMBdWR  =>  L PodWR A
+PodRR       =>  DMBdRR  =>  A PodRR
+PodRW       =>  DMBdRW  =>  A PodRR L
+

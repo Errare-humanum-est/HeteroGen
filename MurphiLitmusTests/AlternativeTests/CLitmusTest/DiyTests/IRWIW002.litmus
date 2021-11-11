@@ -1,0 +1,33 @@
+C IRWIW002
+"Rfe FenceARdRW Coe Rfe FenceARdRW Coe"
+Cycle=Rfe FenceARdRW Coe Rfe FenceARdRW Coe
+Relax=ACFenceARdRW
+Safe=Coe
+Generator=diy7 (version 7.56)
+Prefetch=1:x=F,1:y=W,3:y=F,3:x=W
+Com=Rf Co Rf Co
+Orig=Rfe FenceARdRW Coe Rfe FenceARdRW Coe
+
+{}
+
+P0 (volatile int* x) {
+  *x = 2;
+}
+
+P1 (volatile int* y,volatile int* x) {
+  int r0 = *x;
+  atomic_thread_fence(memory_order_acq_rel);
+  *y = 1;
+}
+
+P2 (volatile int* y) {
+  *y = 2;
+}
+
+P3 (volatile int* y,volatile int* x) {
+  int r0 = *y;
+  atomic_thread_fence(memory_order_acq_rel);
+  *x = 1;
+}
+
+exists (x=2 /\ y=2 /\ 1:r0=2 /\ 3:r0=2)

@@ -1,0 +1,25 @@
+C 2+2W009
+"FenceCondWW Coe FenceCondWW Coe"
+Cycle=Coe FenceCondWW Coe FenceCondWW
+Relax=FenceCondWW
+Safe=Coe
+Generator=diy7 (version 7.56)
+Prefetch=0:x=F,0:y=W,1:y=F,1:x=W
+Com=Co Co
+Orig=FenceCondWW Coe FenceCondWW Coe
+
+{}
+
+P0 (volatile int* y,volatile int* x) {
+  *x = 2;
+  atomic_thread_fence(memory_order_consume);
+  *y = 1;
+}
+
+P1 (volatile int* y,volatile int* x) {
+  *y = 2;
+  atomic_thread_fence(memory_order_consume);
+  *x = 1;
+}
+
+exists (x=2 /\ y=2)

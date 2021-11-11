@@ -1,0 +1,28 @@
+C 3.2W000
+"PodWW Coe PodWW Coe PodWW Coe"
+Cycle=Coe PodWW Coe PodWW Coe PodWW
+Relax=PodWW
+Safe=Coe
+Generator=diy7 (version 7.56)
+Prefetch=0:x=F,0:y=W,1:y=F,1:z=W,2:z=F,2:x=W
+Com=Co Co Co
+Orig=PodWW Coe PodWW Coe PodWW Coe
+
+{}
+
+P0 (volatile int* y,volatile int* x) {
+  *x = 2;
+  *y = 1;
+}
+
+P1 (volatile int* z,volatile int* y) {
+  *y = 2;
+  *z = 1;
+}
+
+P2 (volatile int* z,volatile int* x) {
+  *z = 2;
+  *x = 1;
+}
+
+exists (x=2 /\ y=2 /\ z=2)

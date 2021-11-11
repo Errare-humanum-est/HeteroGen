@@ -1,0 +1,10 @@
+ARM CoWR ()
+"CoWR"
+{
+P0:R5=x; P1:R5=x;
+}
+P0        | P1          ;
+mov R1,1  |mov R1,2      ;
+str R1,R5 |str R1,R5 ;
+ldr R2,R5 |             ;
+~exists (x=1 /\ P0:R2=2)

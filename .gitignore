@@ -1,0 +1,8 @@
+.idea/
+/venv/
+/Protocols/MOESI_Directory/RF_Dir/ord_net/HeteroGen/
+/Protocols/MOESI_Directory/RF_Dir/ord_net/FlatGen/
+__pycache__/
+*.py[cod]
+*$py.class
+**/*.pyc

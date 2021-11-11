@@ -1,0 +1,124 @@
+# NrCaches 3
+
+Network { Ordered fwd;   //FwdGetS, FwdGetM, Inv, PutAck
+          Ordered resp;  // Data, InvAck
+          Ordered req;   //GetS, GetM, PutM
+          };
+
+Cache {
+    State I;
+    Data cl;
+} set[NrCaches] cache;
+
+Directory {
+    State I;
+    Data cl;
+    ID owner;
+} directory;
+
+Message Request{};
+
+Message Ack{};
+
+Message Resp{
+    Data cl;
+};
+
+Message RespAck{
+    Data cl;
+};
+
+Architecture cache {
+
+    Stable{I, M}
+
+    // I ////////////////////////////////////////////////////////
+    Process(I, load, State){
+        msg = Request(GetM, ID, directory.ID);
+        req.send(msg);
+
+        await{
+            when GetM_Ack_D:
+                cl=GetM_Ack_D.cl;
+                load;
+                State = M;
+                break;
+        }
+    }
+
+
+    Process(I, store, State){
+        msg = Request(GetM, ID, directory.ID);
+        req.send(msg);
+
+        await{
+            when GetM_Ack_D:
+                cl=GetM_Ack_D.cl;
+                store;
+                State = M;
+                break;
+        }
+    }
+
+
+    // M ////////////////////////////////////////////////////////
+    Process(M, load){
+        load;
+    }
+
+    Process(M, store, M){
+        store;
+    }
+
+    Process(M, Fwd_GetM, I){
+        msg = Resp(GetM_Ack_D, ID, Fwd_GetM.src, cl);
+        resp.send(msg);
+    }
+
+    Process(M, evict, State){
+        msg = Resp(PutM, ID, directory.ID, cl);
+        req.send(msg);
+
+        await{
+            when Put_Ack:
+                State = I;
+                break;
+        }
+    }
+
+}
+
+Architecture directory {
+
+    Stable{I, M}
+
+    // I ////////////////////////////////////////////////////////
+    Process(I, GetM, M){
+        msg = Resp(GetM_Ack_D, ID, GetM.src, cl);
+        resp.send(msg);
+        owner = GetM.src;
+    }
+
+    Process(I, PutM, I){
+       msg = Ack(Put_Ack, ID, PutM.src);
+       fwd.send(msg);
+    }
+
+    // M ////////////////////////////////////////////////////////
+    Process(M, GetM){
+       msg = Request(Fwd_GetM, GetM.src, owner);
+       fwd.send(msg);
+       owner = GetM.src;
+    }
+
+    Process(M, PutM, State){
+       msg = Ack(Put_Ack, ID, PutM.src);
+       fwd.send(msg);
+
+       if owner == PutM.src{
+            cl = PutM.cl;
+            State=I;
+       }
+    }
+
+}
