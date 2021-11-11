@@ -20,11 +20,13 @@ The output directory for the generated Murphi model checker files is *Protocols/
 ## Model Checker Setup
 To compile the generated murphi litmus test files **update variable ’murphi_compiler_path’**  in  TestScripts/ParallelCompiler.py  to  your  localMurphi path.
 Now compile the model checker files:
+
   *python3 TestScripts/ParallelCompiler.py*
   
 ## Evaluation and Expected Results
 To verify the correctness of the generated heterogeneous cache co-herence protocols, the Murphi model checker is used.
 Run the generated model checking executables:
+
   *python3 TestScripts/ParallelChecker.py*
 
 The runtime of all litmus tests depends on the amount of RAM and number of CPUs available. The ParallelChecker.py will automatically run all litmus tests and generate a report file 'Test_Result.txt' in the TestScripts directory.
