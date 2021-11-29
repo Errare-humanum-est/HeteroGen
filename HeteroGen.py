@@ -31,11 +31,12 @@ from Protocols.HeteroGen.Ordered.MESI_x_RCCOHetero import MESIxRCCOHetero
 from Protocols.HeteroGen.Ordered.MESI_x_RCCHetero import MESIxRCCHetero
 from Protocols.HeteroGen.Ordered.RCCOHetero_x_RCCHetero import RCCOHeteroxRCCHetero
 from Protocols.HeteroGen.Ordered.RCCHetero_x_RCCHetero import RCCHeteroxRCCHetero
+from Protocols.HeteroGen.Ordered.RCCOHetero_x_RCCOHetero import RCCOHeteroxRCCOHetero
 
 
 MSIxMESI()
-#MESIxRCCOHetero()
-#MESIxRCCHetero()
-#RCCOHeteroxRCCHetero()
-#RCCHeteroxRCCHetero()
-
+MESIxRCCOHetero()
+MESIxRCCHetero()
+RCCOHeteroxRCCHetero()
+RCCHeteroxRCCHetero()
+RCCOHeteroxRCCOHetero()
