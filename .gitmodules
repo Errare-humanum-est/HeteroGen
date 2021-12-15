@@ -1,0 +1,6 @@
+[submodule "CMurphi"]
+	path = CMurphi
+	url = https://github.com/Errare-humanum-est/CMurphi
+[submodule "antlr3"]
+	path = antlr3
+	url = https://github.com/Errare-humanum-est/antlr3
