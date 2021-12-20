@@ -133,7 +133,7 @@ def print_result():
     if not failed_test_dict and len(litmus_thread_service_list) == 0:
         result_str += "SUCCESS: No Errors" + '\n'
 
-    MurphiWorkerThread.write_file(def_path, 'Test_Result.txt', result_str)
+    MurphiWorkerThread.write_file(def_path, 'TestScripts/Test_Result.txt', result_str)
 
     if len(litmus_thread_service_list) == 0:
         print(result_str)
@@ -398,7 +398,7 @@ max_memory = 64000
 # Record the default path to dump result file into
 def_path = os.getcwd()
 
-litmus_test_files_path = def_path + '/../Protocols/MOESI_Directory/RF_Dir/ord_net/HeteroGen'
+litmus_test_files_path = def_path + '/Protocols/MOESI_Directory/RF_Dir/ord_net/HeteroGen'
 
 # Runs smallest litmus tests first
 smallest_first = True
