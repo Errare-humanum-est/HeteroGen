@@ -1,0 +1,9 @@
+protocol "HETERO_RCCO_GEN_WR_HS";
+include "RubySlicc_interfaces.slicc";
+include "HETERO_RCCO-msg.sm";
+include "HETERO_RCCO-RCCOCache_GEN_WR_HS.sm";
+include "HETERO_RCCO-L1cache_GEN_WR_HS.sm";
+include "HETERO_RCCO-L2cache_GEN_WR_HS.sm";
+include "HETERO_RCCO-dir.sm";
+
+
