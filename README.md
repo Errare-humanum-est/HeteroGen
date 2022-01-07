@@ -1,5 +1,5 @@
 # HeteroGen
-https://github.com/Errare-humanum-est/HeteroGen/blob/4b461e10eb93145de129d942ca78a2b551eea3f7/HeteroGen%20HPCA22.pdf
+[HeteroGen Paper](https://github.com/Errare-humanum-est/HeteroGen/blob/4b461e10eb93145de129d942ca78a2b551eea3f7/HeteroGen%20HPCA22.pdf)
 
 ## Hardware dependencies
 
