@@ -3,22 +3,35 @@ in_port(mandatory_in, RubyRequest, mandatoryQueue) {
     peek(mandatory_in, RubyRequest, block_on="LineAddress") {
       Addr LineAddress := in_msg.LineAddress;
       Entry entry := getEntry(LineAddress);
-      if (is_invalid(entry) &&
-          cache.cacheAvail(LineAddress) == false ) {
-        Addr LineAddress := cache.cacheProbe(in_msg.LineAddress);
+      DPRINTF(RubySlicc, "mandatory_in: %s %s (addr: %#x)\n", in_msg.Type, getState(TBEs[LineAddress], entry, LineAddress), LineAddress);
+      if (is_invalid(entry) && cache_instruction.cacheAvail(LineAddress) == false$4$) {
+      Addr victim := cache_instruction.cacheProbe(in_msg.LineAddress);
+        DPRINTF(RubySlicc, "Evicting %#x (%s) for %#x\n", victim, getState(TBEs[victim], getEntry(victim), victim), LineAddress);
+        Addr LineAddress := victim;
         TBE tbe := TBEs[LineAddress];
         Entry entry := getEntry(LineAddress);
         State st := getState(tbe, entry, LineAddress);
-$0$
+        $0$
+      } else if (is_invalid(entry) &&
+          cache.cacheAvail(LineAddress) == false$5$) {
+        Addr victim := cache.cacheProbe(in_msg.LineAddress);
+        DPRINTF(RubySlicc, "Evicting %#x (%s) for %#x\n", victim, getState(TBEs[victim], getEntry(victim), victim), LineAddress);
+        Addr LineAddress := victim;
+        TBE tbe := TBEs[LineAddress];
+        Entry entry := getEntry(LineAddress);
+        State st := getState(tbe, entry, LineAddress);
+        $0$
       } else {
         TBE tbe := TBEs[LineAddress];
         Entry entry := getEntry(LineAddress);
         State st := getState(tbe, entry, LineAddress);
-        if (in_msg.Type == RubyRequestType:LD ||
-            in_msg.Type == RubyRequestType:IFETCH) {
-$1$
+        if (in_msg.Type == RubyRequestType:LD) {
+        $1$
+
+        } else if (in_msg.Type == RubyRequestType:IFETCH) {
+        $2$
         } else if (in_msg.Type == RubyRequestType:ST) {
-$2$
+        $3$
         } else {
           error("Unexpected message type from processor");
         }

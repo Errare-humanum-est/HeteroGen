@@ -1,0 +1,5 @@
+action(allocEntry_instruction, "ab", desc="Allocate an entry") {
+     assert(is_invalid(cache_entry));
+     assert(cache_instruction.cacheAvail(address));
+     set_cache_entry(cache_instruction.allocate(address, new Entry));
+}

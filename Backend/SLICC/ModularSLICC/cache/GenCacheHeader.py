@@ -29,19 +29,37 @@
 #
 #
 
-from DataObjects.Architecture.ClassBaseArchitecture import BaseArchitecture
 from Backend.SLICC.ModularSLICC.TemplateClass import TemplateHandler
 from Backend.SLICC.ModularSLICC.common.GenMachineHeader import GenMachineHeader
+from DataObjects.Architecture.ClassFlatArchitecture import FlatArchitecture
+from Backend.SLICC.ModularSLICC.BackendOptions import OPTIONS, LLC_BANKED, LLC_RANGE
 
 
 class GenCacheHeader(TemplateHandler):
 
     template_file = "cache_header.sm"
-
+    template_file_2 = "cache_header_wL2.sm"
     def __init__(self, handler_dir: str):
         TemplateHandler.__init__(self, handler_dir)
 
-    def gen_cache_header_str(self, arch: BaseArchitecture):
+    def gen_cache_header_str(self, arch: FlatArchitecture, id_mapping: dict[str, str]):
         const_str = "//" + __name__ + self.nl
-        const_str += GenMachineHeader.gen_machine_header_str(self, arch, GenCacheHeader.template_file, False)
+        if len(id_mapping) > 2:
+            header = GenMachineHeader.gen_machine_header_str(self, arch, id_mapping, GenCacheHeader.template_file, False)
+            if OPTIONS.llc_mapping in (LLC_BANKED, LLC_RANGE):
+                # LLC slices interleaved by address within the cluster (BackendOptions): the number of
+                # selection bits and the cluster are configuration parameters, the low bit is the
+                # block offset (banked) or the top of the physical address minus the selection bits
+                # (range)
+                llc = id_mapping[list(id_mapping.keys())[list(id_mapping.keys()).index(arch.arch_name) + 1]]
+                header = header.replace(f"  int {llc}_id;{self.nl}",
+                                        f"  int {llc}_id;{self.nl}  int l2_select_num_bits;{self.nl}"
+                                        f"  int cluster_id;{self.nl}", 1)
+                low_bit = "RubySystem::getBlockSizeBits()" if OPTIONS.llc_mapping == LLC_BANKED else \
+                    "RubySystem::getRealPhysMemBits() - RubySystem::getL2Bits()"
+                header = header.rstrip() + self.nl + \
+                    f'  int l2_select_low_bit, default="{low_bit}";' + self.nl
+            const_str += header
+        else:
+            const_str += GenMachineHeader.gen_machine_header_str(self, arch, id_mapping, GenCacheHeader.template_file_2, False)
         return const_str + self.nl

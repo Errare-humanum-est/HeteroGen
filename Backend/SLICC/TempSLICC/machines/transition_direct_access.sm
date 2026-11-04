@@ -1,0 +1,5 @@
+transition($0$, $1$, $2$) {
+$3$  $4$;
+  direct_$5$Hit;
+$6$  popmandatory_in;
+}

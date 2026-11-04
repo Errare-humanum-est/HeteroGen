@@ -29,11 +29,11 @@
 #
 #
 
-from DataObjects.Architecture.ClassBaseArchitecture import BaseArchitecture
 from Backend.SLICC.ModularSLICC import SLICCTokens
 from Backend.SLICC.ModularSLICC.TemplateClass import TemplateHandler
 from Backend.SLICC.ModularSLICC.common import Util
 from Backend.SLICC.ModularSLICC.common.GenMachineStruct import GenMachineStruct
+from DataObjects.Architecture.ClassFlatArchitecture import FlatArchitecture
 
 
 class GenCacheStruct(TemplateHandler):
@@ -47,7 +47,7 @@ class GenCacheStruct(TemplateHandler):
     def __init__(self, handler_dir: str):
         TemplateHandler.__init__(self, handler_dir)
 
-    def gen_cache_struct_str(self, arch: BaseArchitecture) -> str:
+    def gen_cache_struct_str(self, arch: FlatArchitecture) -> str:
         const_str = "//" + __name__ + self.nl
         body = None
         for var_name, variable in arch.machine.variables.items():
@@ -57,7 +57,7 @@ class GenCacheStruct(TemplateHandler):
             if var_name == Util.get_active_cache_line(arch):
                 method_fct = SLICCTokens.data_type_map.get(variable.getText(), '_pass_node')
                 method = getattr(GenMachineStruct, method_fct)
-                res = method(variable)
+                res = method(variable, arch)
                 if res:
                     body = self.nl + self.tab + res
                     break

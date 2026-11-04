@@ -1,0 +1,12 @@
+
+  // Partial messages (stores of release-consistency code): only the bytes of the write mask are
+  // merged into the block; an empty mask (a message that is not partial) gives the whole block.
+  void mergeCacheBlock(TBE tbe, Entry cache_entry, Addr LineAddress, DataBlock data, WriteMask mask) {
+    if (mask.isEmpty()) {
+      setCacheBlock(tbe, cache_entry, LineAddress, data);
+    } else {
+      DataBlock block := getCacheBlock(tbe, cache_entry, LineAddress);
+      block.copyPartial(data, mask);
+      setCacheBlock(tbe, cache_entry, LineAddress, block);
+    }
+  }
