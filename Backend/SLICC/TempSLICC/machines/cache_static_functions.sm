@@ -1,0 +1,59 @@
+Tick clockEdge();
+Tick cyclesToTicks(Cycles c);
+Cycles ticksToCycles(Tick t);
+void set_cache_entry(AbstractCacheEntry a);
+void unset_cache_entry();
+void set_tbe(TBE a);
+void unset_tbe();
+
+MachineID mapAddressToMachine(Addr addr, MachineType mtype);
+
+Entry getEntry(Addr LineAddress), return_by_pointer="yes" {
+  return static_cast(Entry, "pointer", cache.lookup(LineAddress));
+}
+
+State getState(TBE tbe, Entry cache_entry, Addr LineAddress) {
+  if (is_valid(tbe)) {
+    return tbe.TBEState;
+  } else if (is_valid(cache_entry)) {
+    return cache_entry.CacheState;
+  } else {
+    return State:$0$;
+  }
+}
+
+void setState(TBE tbe, Entry cache_entry, Addr LineAddress, State state) {
+  if (is_valid(tbe)) {
+    tbe.TBEState := state;
+  }
+  if (is_valid(cache_entry)) {
+    cache_entry.CacheState := state;
+  }
+}
+
+AccessPermission getAccessPermission(Addr LineAddress) {
+  TBE tbe := TBEs[LineAddress];
+  if (is_valid(tbe)) {
+    return L1Cache_State_to_permission(tbe.TBEState);
+  }
+  Entry cache_entry := getEntry(LineAddress);
+  if (is_valid(cache_entry)) {
+    return L1Cache_State_to_permission(cache_entry.CacheState);
+  } else {
+    return AccessPermission:NotPresent;
+  }
+}
+
+void setAccessPermission(Entry cache_entry, Addr LineAddress, State state) {
+  if (is_valid(cache_entry)) {
+    cache_entry.changePermission(L1Cache_State_to_permission(state));
+  }
+}
+
+void functionalRead(Addr addr, Packet *pkt) {
+  testAndRead(addr, getEntry(addr).$1$, pkt);
+}
+
+int functionalWrite(Addr addr, Packet *pkt) {
+  return 0 + testAndWrite(addr, getEntry(addr).$1$, pkt);
+}

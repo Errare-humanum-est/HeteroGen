@@ -1,0 +1,6 @@
+action(a_deallocTBE, "dTBE", desc="Deallocate TBE entry.") {
+  if (is_valid(tbe)) {
+    TBEs.deallocate(address);
+    unset_tbe();
+  }
+}

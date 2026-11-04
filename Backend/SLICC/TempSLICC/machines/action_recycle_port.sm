@@ -1,0 +1,3 @@
+action(recycle$0$, $1$, desc="Recycle the $0$ port") {
+  $0$.recycle(clockEdge(), cyclesToTicks(recycleLatency));
+}

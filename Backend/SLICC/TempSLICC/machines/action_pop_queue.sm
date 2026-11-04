@@ -1,0 +1,6 @@
+action(pop$0$, $1$, desc="Pop the $0$ queue.") {
+    // Sometimes we need to be able to pop a queue/in_port from within a transition
+    // rather than from within the in_port itself. Thus, we need an action for this,
+    // since transitions cannot execute non-action functions.
+    $0$.dequeue(clockEdge());
+}

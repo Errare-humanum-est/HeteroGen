@@ -1,0 +1,5 @@
+action(deallocEntry, "d", desc="Deallocate an entry") {
+    assert(is_valid(cache_entry));
+    cache.deallocate(address);
+    unset_cache_entry();
+}

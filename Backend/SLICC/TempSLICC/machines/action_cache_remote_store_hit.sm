@@ -1,0 +1,7 @@
+action(remote_storeHit, "rSh", desc="Callback remote store hit.") {
+  // Signal to gem5 that this load/read access was a hit remotely
+  // (i.e. was satisfied through the coherence interface)
+  assert(is_valid(cache_entry));
+  cache.setMRU(cache_entry);
+  sequencer.writeCallback(address, cache_entry.$0$, true);
+}

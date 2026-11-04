@@ -1,0 +1,14 @@
+structure(TBE, desc="TBE entries for $0$ machine") {
+  State TBEState,       desc="Transient State";
+$1$
+}
+
+structure(TBETable, external="yes"){
+  TBE lookup(Addr);
+  void allocate(Addr);
+  void deallocate(Addr);
+  bool isPresent(Addr);
+  bool areNSlotsAvailable(int, Tick);
+}
+
+TBETable TBEs, template="<$0$_TBE>", constructor="m_number_of_TBEs";

@@ -1,0 +1,6 @@
+action(local_loadHit, "lLh", desc="Callback local load hit.") {
+  // Signal to gem5 that this load/read access was a hit locally
+  assert(is_valid(cache_entry));
+  cache.setMRU(cache_entry);
+  sequencer.readCallback(address, cache_entry.$0$, false);
+}

@@ -1,0 +1,3 @@
+state_declaration(State, desc="$0$ states", default="$0$_State_$1$") {
+$2$
+}

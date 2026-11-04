@@ -1,0 +1,7 @@
+enqueue(memQueue_out, MemoryMsg, toMemLatency) {
+  out_msg.addr := LineAddress;
+  out_msg.Type := MemoryRequestType:MEMORY_READ;
+  out_msg.Sender := in_msg.Sender;
+  out_msg.MessageSize := MessageSizeType:Request_Control;
+  out_msg.Len := 0;
+}

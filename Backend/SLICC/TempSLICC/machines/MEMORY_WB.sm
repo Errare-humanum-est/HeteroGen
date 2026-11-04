@@ -1,0 +1,8 @@
+enqueue(memQueue_out, MemoryMsg, toMemLatency) {
+  out_msg.addr := LineAddress;
+  out_msg.Type := MemoryRequestType:MEMORY_WB;
+  out_msg.Sender := in_msg.Sender;
+  out_msg.MessageSize := MessageSizeType:Writeback_Data;
+  out_msg.DataBlk := in_msg.$0$;
+  out_msg.Len := 0;
+}

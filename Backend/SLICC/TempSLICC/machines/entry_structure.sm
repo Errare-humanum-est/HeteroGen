@@ -1,0 +1,4 @@
+structure(Entry, desc="Stored variables of the $1$ machine", interface="AbstractCacheEntry"$0$) {
+  State $1$State, desc="$1$ state";
+$2$
+}

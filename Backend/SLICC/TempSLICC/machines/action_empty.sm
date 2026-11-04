@@ -1,0 +1,5 @@
+action(empty, "e", desc="Empty action") {
+    // empty action; useful as SLICC requires valid transitions
+    // to be non-empty, but the actions being invoked can still be empty
+    // e.g. to simulate a z-stall
+}

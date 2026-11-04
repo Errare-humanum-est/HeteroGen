@@ -1,0 +1,16 @@
+machine(MachineType:L1Cache, "Cache controller")
+: Sequencer *sequencer;
+  CacheMemory *cache;
+  bool send_evictions;
+
+  // The following latencies should be exposed as command-line parameters in a future update
+  Cycles responseLatency := 1;
+  Cycles recycleLatency := 10;
+
+  // Required networks
+  MessageBuffer *mandatoryQueue;
+
+  // Dynamic networks
+  $0$
+
+{

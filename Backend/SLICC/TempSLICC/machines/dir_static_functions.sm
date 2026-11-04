@@ -1,0 +1,57 @@
+Tick clockEdge();
+Tick cyclesToTicks(Cycles c);
+Cycles ticksToCycles(Tick t);
+void set_tbe(TBE a);
+void unset_tbe();
+
+Entry getEntry(Addr LineAddress), return_by_pointer="yes" {
+  Entry entry := static_cast(Entry, "pointer", $1$[LineAddress]);
+  if (is_invalid(entry)) {
+    entry := static_cast(Entry, "pointer", $1$.allocate(LineAddress, new Entry));
+  }
+  return entry;
+}
+
+State getState(TBE tbe, Addr LineAddress) {
+  if (is_valid(tbe)) {
+    return tbe.TBEState;
+  } else if ($1$.isPresent(LineAddress)) {
+    return getEntry(LineAddress).$0$State;
+  } else {
+    return State:$2$;
+  }
+}
+
+void setState(TBE tbe, Addr LineAddress, State state) {
+  if (is_valid(tbe)) {
+    tbe.TBEState := state;
+  }
+  if ($1$.isPresent(LineAddress)) {
+    getEntry(LineAddress).$0$State := state;
+  }
+}
+
+AccessPermission getAccessPermission(Addr LineAddress) {
+  TBE tbe := TBEs[LineAddress];
+  if (is_valid(tbe)) {
+    return $0$_State_to_permission(tbe.TBEState);
+  } else if ($1$.isPresent(LineAddress)) {
+    return $0$_State_to_permission(getEntry(LineAddress).$0$State);
+  } else {
+    return AccessPermission:NotPresent;
+  }
+}
+
+void setAccessPermission(Addr LineAddress, State state) {
+  if ($1$.isPresent(LineAddress)) {
+    getEntry(LineAddress).changePermission($0$_State_to_permission(state));
+  }
+}
+
+void functionalRead(Addr LineAddress, Packet *pkt) {
+  functionalMemoryRead(pkt);
+}
+
+int functionalWrite(Addr LineAddress, Packet *pkt) {
+  return 0 + functionalMemoryWrite(pkt);
+}

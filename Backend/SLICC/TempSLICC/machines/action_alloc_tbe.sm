@@ -1,0 +1,4 @@
+action(a_allocTBE, "aTBE", desc="Allocate TBE entry.") {
+  TBEs.allocate(address);
+  set_tbe(TBEs[address]);
+}

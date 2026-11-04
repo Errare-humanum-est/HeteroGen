@@ -1,0 +1,3 @@
+enumeration(CoherenceMessageType, desc="Types of coherence messages") {
+$0$
+}

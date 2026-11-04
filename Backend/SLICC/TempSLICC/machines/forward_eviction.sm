@@ -1,0 +1,4 @@
+// If necessary, forward the eviction to the CPU so that it can squash speculation
+if (send_evictions) {
+  sequencer.evictionCallback(LineAddress);
+}

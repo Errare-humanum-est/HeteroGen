@@ -1,0 +1,5 @@
+transition($0$, dealloc$1$) {
+    deallocEntry;
+    a_deallocTBE;
+    $2$;
+}

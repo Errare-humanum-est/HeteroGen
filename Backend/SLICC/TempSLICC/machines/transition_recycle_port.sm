@@ -1,0 +1,3 @@
+transition($0$, Stall$1$) {
+    recycle$1$;
+}

@@ -1,0 +1,10 @@
+in_port($0$, $1$, $2$) {
+  if ($0$.isReady(clockEdge())) {
+    peek ($0$, $1$, block_on="LineAddress") {
+      Addr LineAddress := in_msg.LineAddress;
+      TBE tbe := TBEs[LineAddress];
+      State st := getState(tbe,$4$ LineAddress);
+$3$
+    }
+  }
+}

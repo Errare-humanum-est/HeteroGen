@@ -1,0 +1,10 @@
+in_port(memQueue_in, MemoryMsg, responseFromMemory) {
+  if (memQueue_in.isReady(clockEdge())) {
+    peek(memQueue_in, MemoryMsg) {
+      Addr LineAddress := in_msg.addr;
+      TBE tbe := TBEs[LineAddress];
+      State st := getState(tbe, LineAddress);
+$0$
+    }
+  }
+}

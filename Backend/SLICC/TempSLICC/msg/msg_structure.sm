@@ -1,0 +1,20 @@
+structure(CoherenceMessage, desc="...", interface="Message") {
+  Addr LineAddress,             desc="Physical address for this request";
+  CoherenceMessageType Type,   desc="Type of request (GetS, GetM, PutM, etc)";
+  MachineID Sender,            desc="Node who initiated the request";
+  NetDest Destination,         desc="Multicast destination mask";
+  MessageSizeType MessageSize, desc="size category of the message";
+$0$
+
+  bool functionalRead(Packet *pkt) {
+    // A check on message type should appear here so that only those
+    // messages that contain data
+    return testAndRead(LineAddress, $1$, pkt);
+  }
+
+  bool functionalWrite(Packet *pkt) {
+    // No check on message type required since the protocol should read
+    // data block from only those messages that contain valid data
+    return testAndWrite(LineAddress, $1$, pkt);
+  }
+}

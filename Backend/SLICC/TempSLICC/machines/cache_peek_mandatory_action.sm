@@ -1,0 +1,5 @@
+action($0$, $1$, desc="TODO") {
+  peek(mandatory_in, RubyRequest) {
+$2$
+  }
+}
