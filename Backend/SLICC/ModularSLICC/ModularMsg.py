@@ -28,21 +28,22 @@
 #
 #
 #
-from abc import ABC
 
-from DataObjects.ClassCluster import Cluster
 from Backend.SLICC.ModularSLICC.msg.GenMsgBase import GenMsgBase
+from Backend.SLICC.ModularSLICC.BackendOptions import GEM5_V20, OPTIONS
+from DataObjects.Architecture.ClassGlobalBaseArchitecture import GlobalBaseArchitecture
 
 
-class ModularMsg(GenMsgBase, ABC):
+class ModularMsg(GenMsgBase):
     TemplateDir = "TempSLICC/msg"
 
-    def __init__(self, cluster: Cluster, file_name: str):
+    def __init__(self, arch: GlobalBaseArchitecture, file_name: str):
         GenMsgBase.__init__(self, self.TemplateDir)
 
-        file_name = file_name.split(".")[0] + "_msg.sm"
+        file_name = file_name.split(".")[0] + "_msg_synth.sm"
 
         with open(file_name, "w") as gem5file:
-            gem5file.write(self.gen_msg_enum_str(cluster) + self.nl)
-            gem5file.write(self.gen_msg_struct_str(cluster) + self.nl)
-            #gem5file.write(self.gen_dma_default_str())
+            if OPTIONS.gem5 == GEM5_V20:
+                gem5file.write(self.open_template("msg_alloy_types.sm"))
+            gem5file.write(self.gen_msg_enum_str(arch) + self.nl)
+            gem5file.write(self.gen_msg_struct_str(arch) + self.nl)
