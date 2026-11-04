@@ -1,8 +1,7 @@
-machine(MachineType:Directory, "Directory protocol")
+machine(MachineType:$0$, "Directory protocol")
 :
 
   DirectoryMemory *directory;
-  // The following latencies should be exposed as command-line parameters in a future update
   Cycles toMemLatency := 1;
   Cycles responseLatency := 6;
   Cycles recycleLatency := 10;
@@ -12,6 +11,6 @@ machine(MachineType:Directory, "Directory protocol")
   MessageBuffer *responseFromMemory;
 
   // Dynamic networks
-  $0$
+  $1$
 
 {

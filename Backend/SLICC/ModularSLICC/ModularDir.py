@@ -38,13 +38,13 @@ from Backend.SLICC.ModularSLICC.dir.GenDirBase import GenDirBase
 class ModularDir(GenDirBase):
     TemplateDir = "TempSLICC/machines"
 
-    def __init__(self, cluster: Cluster, arch: FlatArchitecture, file_name: str):
+    def __init__(self, cluster: Cluster, arch: FlatArchitecture, file_name: str, machine_mappings: dict[str, str]):
         GenDirBase.__init__(self, self.TemplateDir)
 
-        file_name = file_name.split(".")[0] + "_dir.sm"
+        file_name = file_name.split(".")[0] + "_dir_synth.sm"
 
-        out_ports = Util.get_out_ports(arch)
-        in_ports = Util.get_in_ports(arch)
+        out_ports = Util.get_out_ports(arch, False)
+        in_ports = Util.get_in_ports(arch, False)
 
         # In the directory we sometimes need to add an extra step in some transitions,
         # since the ProtoGen DSL does not explicitly deal with main memory but this is
@@ -54,11 +54,11 @@ class ModularDir(GenDirBase):
         # this first even though we want them ordered last...
         # TODO this should be refactored to be handled more elegantly
         main_memory_accesses = {}
-        dir_in_ports_str = self.gen_dir_in_ports_str(cluster, arch, in_ports, out_ports, main_memory_accesses)
+        dir_in_ports_str = self.gen_dir_in_ports_str(cluster, arch, in_ports, out_ports, machine_mappings, main_memory_accesses)
 
         with open(file_name, "w") as slicc_file:
             # Write header
-            slicc_file.write(self.gen_dir_header_str(arch))
+            slicc_file.write(self.gen_dir_header_str(arch, machine_mappings))
             # Write (indented) body
             slicc_file.write(
                 self.add_tabs(

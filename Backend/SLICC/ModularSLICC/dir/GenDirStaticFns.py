@@ -29,8 +29,8 @@
 #
 #
 
-from DataObjects.Architecture.ClassBaseArchitecture import BaseArchitecture
 from Backend.SLICC.ModularSLICC.TemplateClass import TemplateHandler
+from DataObjects.Architecture.ClassFlatArchitecture import FlatArchitecture
 
 
 class GenDirStaticFns(TemplateHandler):
@@ -39,7 +39,7 @@ class GenDirStaticFns(TemplateHandler):
     def __init__(self, handler_dir: str):
         TemplateHandler.__init__(self, handler_dir)
 
-    def gen_dir_static_fns_str(self, arch: BaseArchitecture) -> str:
+    def gen_dir_static_fns_str(self, arch: FlatArchitecture) -> str:
         const_str = "//" + __name__ + self.nl
         const_str += self.string_repl_keys(self.open_template(GenDirStaticFns.template_file),
                                            ["Directory", "directory", str(arch.init_state)]

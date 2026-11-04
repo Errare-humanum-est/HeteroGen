@@ -30,9 +30,9 @@
 #
 
 from typing import List
-from DataObjects.Architecture.ClassBaseArchitecture import BaseArchitecture
 from Backend.SLICC.ModularSLICC.TemplateClass import TemplateHandler
 from Backend.SLICC.ModularSLICC.common.GenMachineStateDecl import GenMachineStateDecl
+from DataObjects.Architecture.ClassFlatArchitecture import FlatArchitecture
 
 
 class GenDirStateDecl(TemplateHandler):
@@ -41,19 +41,18 @@ class GenDirStateDecl(TemplateHandler):
     def __init__(self, handler_dir: str):
         TemplateHandler.__init__(self, handler_dir)
 
-    def gen_dir_state_decl_str(self, arch: BaseArchitecture, main_mem_induced_states: List[str]) -> str:
+    def gen_dir_state_decl_str(self, arch: FlatArchitecture, main_mem_induced_states: List[str]) -> str:
         const_str = "//" + __name__ + self.nl
-        state_declaration_body = GenMachineStateDecl.gen_machine_state_decl_body_str(self, arch) \
+        state_declaration_body = GenMachineStateDecl.gen_machine_state_decl_body_str(self, arch, False) \
                                  + self.nl \
-                                 + ''.join([self.string_repl_keys(self.open_template("state_declaration_entry.sm"),
-                                                                    [state_name, "Busy"]
+                                 + self.nl.join([self.tab + self.string_repl_keys(self.open_template("state_declaration_entry.sm"),
+                                                                    [state_name, "Read_Only"]
                                                                     )
-                                            + self.nl
                                             for state_name in main_mem_induced_states
                                             ]
                                            )
         init_state = str(arch.init_state)
         const_str += self.string_repl_keys(self.open_template(GenDirStateDecl.template_file),
-                                           ["Directory", init_state, self.add_tabs(state_declaration_body, 1)]
+                                           ["Directory", init_state, state_declaration_body]
                                            )
         return const_str + self.nl

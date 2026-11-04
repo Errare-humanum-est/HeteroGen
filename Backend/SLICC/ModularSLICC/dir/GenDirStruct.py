@@ -29,9 +29,10 @@
 #
 #
 
-from DataObjects.Architecture import ClassBaseArchitecture
 from Backend.SLICC.ModularSLICC.TemplateClass import TemplateHandler
 from Backend.SLICC.ModularSLICC.common.GenMachineStruct import GenMachineStruct
+from DataObjects.Architecture.ClassFlatArchitecture import FlatArchitecture
+from Backend.SLICC.ModularSLICC.BackendOptions import GEM5_V20, OPTIONS
 
 
 class GenDirStruct(TemplateHandler):
@@ -45,10 +46,14 @@ class GenDirStruct(TemplateHandler):
     def __init__(self, handler_dir: str):
         TemplateHandler.__init__(self, handler_dir)
 
-    def gen_dir_struct_str(self, arch: ClassBaseArchitecture) -> str:
+    def gen_dir_struct_str(self, arch: FlatArchitecture) -> str:
         const_str = "//" + __name__ + self.nl
         body = GenMachineStruct.gen_machine_struct_body_str(self, arch)
-        const_str += self.string_repl_keys(self.open_template(GenDirStruct.template_file),
-                                           [", main=\"false\"", "Directory", body]
-                                           )
+        struct = self.string_repl_keys(self.open_template(GenDirStruct.template_file),
+                                       [", main=\"false\"", "Directory", body]
+                                       )
+        if OPTIONS.gem5 == GEM5_V20:
+            # the DirectoryMemory of gem5 v20 holds AbstractEntry objects (AbstractCacheEntry in v23)
+            struct = struct.replace('interface="AbstractCacheEntry"', 'interface="AbstractEntry"', 1)
+        const_str += struct
         return const_str + self.nl
