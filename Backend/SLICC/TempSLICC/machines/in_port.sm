@@ -4,6 +4,7 @@ in_port($0$, $1$, $2$) {
       Addr LineAddress := in_msg.LineAddress;
       TBE tbe := TBEs[LineAddress];
       State st := getState(tbe,$4$ LineAddress);
+      DPRINTF(RubySlicc, "$0$: %s %s %s (addr: %#x)\n", in_msg.Type, in_msg.Sender, st, LineAddress);
 $3$
     }
   }

@@ -1,3 +1,5 @@
 action(recycle$0$, $1$, desc="Recycle the $0$ port") {
+  DPRINTF(RubySlicc, "Stalling $0$ (addr: %#x)\n", address);
   $0$.recycle(clockEdge(), cyclesToTicks(recycleLatency));
+  //stall_and_wait($0$, address);
 }

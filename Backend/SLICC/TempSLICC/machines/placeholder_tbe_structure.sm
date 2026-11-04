@@ -1,6 +1,7 @@
 structure(TBE, desc="TBE entries for $0$ machine") {
   State TBEState,       desc="Transient State";
 $1$
+  bool dirty;
 }
 
 structure(TBETable, external="yes"){

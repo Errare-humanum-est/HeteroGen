@@ -37,12 +37,12 @@ from DataObjects.ClassMultiDict import MultiDict
 from DataObjects.Transitions.ClassTransitionv2 import Transition_v2
 from networkx import DiGraph
 
-from Parser.ParserDataTypes.ClassBaseNetwork import BaseMessage
 from Backend.SLICC.ModularSLICC import SLICCTokens
 from Backend.SLICC.ModularSLICC.TemplateClass import TemplateHandler
 from Backend.SLICC.ModularSLICC.common import Util
 from Backend.SLICC.ModularSLICC.common.GenPCCToSLICC import GenPCCToSLICC
 from Backend.SLICC.ModularSLICC.common.GenSLICCTree import GenSLICCTree, UniqueNode
+from Parser.DataTypes.ClassBaseNetwork import BaseMessage
 
 
 # TODO this class should probably be re-written to not be fully static so as to reduce the number of arguments
@@ -55,9 +55,13 @@ class GenMachineInPorts:
             temp_h: TemplateHandler,
             cluster: Cluster,
             arch: FlatArchitecture,
+            cache: bool,
+            arch_name: str,
             in_ports: 'OrderedDict[str, str]',
             out_ports: 'OrderedDict[str, str]',
+            machine_mappings: dict[str, str],
             main_mem_accesses: Dict[Tuple[str, str], DiGraph] = None,
+            evict_code: dict[str, str] = {}
     ) -> str:
         if main_mem_accesses is None:
             main_mem_accesses = {}
@@ -65,7 +69,7 @@ class GenMachineInPorts:
         for net_name, in_port in in_ports.items():
             nets.append(
                 GenMachineInPorts._gen_in_port(
-                    temp_h, net_name, in_port, cluster, arch, out_ports, main_mem_accesses))
+                    temp_h, net_name, in_port, cluster, arch, cache, arch_name, out_ports, machine_mappings, main_mem_accesses, evict_code))
         return temp_h.nl.join(nets)
 
     @staticmethod
@@ -75,14 +79,31 @@ class GenMachineInPorts:
             port_name: str,
             cluster: Cluster,
             arch: FlatArchitecture,
+            cache: bool,
+            arch_name: str,
             out_ports: 'OrderedDict[str, str]',
+            machine_mappings: dict[str, str],
             main_mem_accesses: Dict[Tuple[str, str], DiGraph],
+            evict_code: dict[str, str]
     ) -> str:
         # This is *extremely* TODO/WIP
         # For now, let's try just generating the behaviour for every possible
         state_strs = []
         first = True
-        slicc_tree_gen = GenSLICCTree(cluster, arch, port_name, out_ports, allow_port_popping=True)
+        slicc_tree_gen = GenSLICCTree(cluster, arch, cache, port_name, out_ports, machine_mappings, allow_port_popping=True)
+
+        # net_name is the network followed by the direction ("reqFrom"); compare whole names, "req2From"
+        # is not a "req" port
+        evict_section = ""
+        for port, section in evict_code.items():
+            if net_name in (port + "From", port + "To"):
+                evict_section = section + temp_h.nl
+
+        msgset = None
+        for netname, msgs in Util.get_msg_port_mapping(cluster).items():
+            if net_name in (netname + "From", netname + "To"):
+                msgset = msgs
+        assert msgset is not None
 
         transitions_by_state = MultiDict()
         for transition in arch.get_architecture_transitions():
@@ -95,7 +116,11 @@ class GenMachineInPorts:
             for transition in transitions_by_state.get(state, []):
                 if isinstance(transition.guard, BaseMessage) \
                         and str(transition.guard) in arch.global_arch.network.base_message_dict:
-                    transitions_by_guard[str(transition.guard)] = transition
+                    if str(transition.guard) in msgset:
+                        transitions_by_guard[str(transition.guard)] = transition
+
+            if len(transitions_by_guard) <= 0:
+                continue
 
             op_string = ""
             first_guard = True
@@ -104,23 +129,20 @@ class GenMachineInPorts:
                 if not first_guard:
                     prefix = f"{temp_h.nl}{temp_h.tab}}} else {prefix}"
                 prefix = temp_h.tab + prefix
-
-                slicc_tree = slicc_tree_gen.gen_operation_tree_from_trans(transitions_by_guard[guard])
-                test = temp_h.add_tabs(slicc_tree_gen.tree_to_str(slicc_tree), 2)
-
-                #if Util.must_access_memory(arch):
-                #    GenMachineInPorts.replace_mem_ops(temp_h, arch, cluster, slicc_tree, Util.get_active_cache_line(arch),
-                #                                      transitions_by_guard[guard], main_mem_accesses, port_name)
+                slicc_tree = slicc_tree_gen.gen_operation_tree_from_trans(sorted(transitions_by_guard[guard], key=GenMachineInPorts.op_plan))
+                if Util.must_access_memory(cache):
+                    GenMachineInPorts.replace_mem_ops(temp_h, arch, cache, slicc_tree, Util.get_active_cache_line(arch),
+                                                      transitions_by_guard[guard], main_mem_accesses, port_name)
                 op = temp_h.add_tabs(slicc_tree_gen.tree_to_str(slicc_tree), 2)
                 op_string += prefix + op
                 first_guard = False
 
             if op_string:
                 op_string += f"{temp_h.nl}{temp_h.tab}}} else {{{temp_h.nl}{temp_h.tab * 2}" \
-                             f"{Util.gen_stall_str(temp_h, arch, port_name)}{temp_h.nl}{temp_h.tab}}}"
+                             f'{Util.gen_stall_str(temp_h, cache, port_name)}{temp_h.nl}{temp_h.tab}}}'
             else:
                 # Have not generated a body for this clause as there are no expected transitions
-                op_string = f"{temp_h.tab}{Util.gen_stall_str(temp_h, arch, port_name)}"
+                op_string = f"{temp_h.tab}{Util.gen_stall_str(temp_h, cache, port_name)}"
 
             prefix_str = f"if (st == State:{str(state)}) {{"
             body_str = f"{temp_h.nl}{op_string}{temp_h.nl}}}"
@@ -135,18 +157,25 @@ class GenMachineInPorts:
 
             state_strs.append(state_str)
 
-        else_body = temp_h.add_tabs(f"{temp_h.tab}{Util.gen_stall_str(temp_h, arch, port_name)}{temp_h.nl}}}",
-                                    3)
-        state_strs.append(f" else {{{temp_h.nl}{else_body}")
+        else_body = temp_h.add_tabs(f"{Util.gen_stall_str(temp_h, cache, port_name)}",3)
+        if not first:
+            state_strs.append(f" else {{{temp_h.nl}{temp_h.tab}{else_body}{temp_h.nl}{temp_h.tab * 3}}}")
+        else:
+            state_strs.append(temp_h.add_tabs('error("Invalid transition");', 3))
 
         return temp_h.string_repl_keys(temp_h.open_template(GenMachineInPorts.template_file),
                                        [port_name,
                                         "CoherenceMessage",
                                         net_name,
-                                        "".join(state_strs),
-                                        " getEntry(LineAddress)," if arch.machine.check_cache() else "",
+                                        evict_section + "".join(state_strs),
+                                        " getEntry(LineAddress)," if cache else "",
                                         ]) \
                + temp_h.nl
+
+    @staticmethod
+    def op_plan(t: Transition_v2) -> str:
+        return " -> ".join(str(o) for o in t.operations)
+
 
     @staticmethod
     def find_mem_access_subtree_roots(operation_tree: DiGraph, is_access: Callable[[object], bool]) \
@@ -202,7 +231,7 @@ class GenMachineInPorts:
     def replace_mem_ops(
             temp_h: TemplateHandler,
             arch: FlatArchitecture,
-            cluster: Cluster,
+            cache: bool,
             operation_tree: DiGraph,
             cache_line: str,
             transitions: [Transition_v2],
@@ -233,7 +262,7 @@ class GenMachineInPorts:
 
         for idx, (access_node, access_type) in enumerate(mem_access_nodes):
             predecessors = operation_tree.predecessors(access_node)
-            mem_trans_state_name = f"{start_state}_{guard}_MEM_{idx}"
+            mem_trans_state_name = f"{start_state}_{guard}_{idx}"
             trans_op_tree, popped_nodes = GenMachineInPorts.pop_subtree_at_node(operation_tree, access_node)
             nodes_to_remove.update(popped_nodes)
             # Also gen_make sure to pop the memqueue at the end of this new operation tree
@@ -254,13 +283,13 @@ class GenMachineInPorts:
             # Replace this transition with one invoking a memory read and setting the state
             # to our new transient one
             mem_access_str = temp_h.string_repl_keys(temp_h.open_template(f"{access_type}.sm"),
-                                                     [Util.get_message_data_var(cluster)]
+                                                     [Util.get_message_data_var(arch.global_arch)]
                                                      )
             mem_access_node = UniqueNode(mem_trans_state_name + mem_access_str)
             operation_tree.add_node(mem_access_node, op_str=mem_access_str)
             for node in predecessors:
                 operation_tree.add_edge(node, mem_access_node)
-            final_state_str = GenPCCToSLICC.gen_final_state(temp_h, mem_trans_state_name, arch)
+            final_state_str = GenPCCToSLICC.gen_final_state(temp_h, mem_trans_state_name, cache)
             final_state_node = UniqueNode(mem_trans_state_name + final_state_str)
             operation_tree.add_node(final_state_node, op_str=final_state_str)
             operation_tree.add_edge(mem_access_node, final_state_node)
@@ -269,8 +298,8 @@ class GenMachineInPorts:
             pop_node = UniqueNode(str(final_state_node) + pop_str)
             operation_tree.add_node(pop_node, op_str=pop_str)
             operation_tree.add_edge(final_state_node, pop_node)
-            # and gen_make sure we progress..
-            progress_str = Util.gen_progress_str(temp_h, arch)
+            # and make sure we progress..
+            progress_str = Util.gen_progress_str(temp_h, cache)
             progress_node = UniqueNode(str(final_state_node) + progress_str)
             # Also add a dummy event to gen_make sure the simulation makes progress
             operation_tree.add_node(progress_node, op_str=progress_str)

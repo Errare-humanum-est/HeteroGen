@@ -28,33 +28,10 @@
 #
 #
 #
-from DataObjects.Architecture.ClassFlatArchitecture import FlatArchitecture
-from DataObjects.FlowDataTypes.ClassMessage import Message
 from Backend.SLICC.ModularSLICC.TemplateClass import TemplateHandler
 
 
 class GenMachineEvents:
-
-    template_file = "event.sm"
-
-    @staticmethod
-    def gen_events_str(temp_h: TemplateHandler, arch: FlatArchitecture) -> str:
-        events = set()
-        for state in arch.get_architecture_states_verified():
-            for transition in state.state_trans:
-                guard = transition.guard
-                if isinstance(guard, Message):
-                    guard = guard.get_msg_type()
-                else:
-                    guard = guard.type
-                assert (isinstance(guard, str))
-                events.add(guard)
-
-        events_strs = [temp_h.tab + temp_h.string_repl_keys(temp_h.open_template(GenMachineEvents.template_file),
-                                                            [event])
-                       for event in events]
-
-        return temp_h.nl.join(events_strs)
 
     @staticmethod
     def gen_progress_event(temp_h: TemplateHandler) -> str: return f"Progress, desc=\"Progress, please!\"{temp_h.end}"
@@ -64,9 +41,17 @@ class GenMachineEvents:
         return f"Stall{port}, desc=\"Stall the {port} port.\"{temp_h.end}"
 
     @staticmethod
+    def gen_cache_alloc_event(temp_h: TemplateHandler) -> str:
+        return f"allocCacheEntry, desc=\"Allocate a new cache entry.\"{temp_h.end}"
+
+    @staticmethod
     def gen_tbe_alloc_event(temp_h: TemplateHandler) -> str:
         return f"allocTBE, desc=\"Allocate a new TBE.\"{temp_h.end}"
 
     @staticmethod
     def gen_tbe_dealloc_event(temp_h: TemplateHandler) -> str:
         return f"deallocTBE, desc=\"Deallocate a TBE.\"{temp_h.end}"
+
+    @staticmethod
+    def silent_evict_event(temp_h: TemplateHandler) -> str:
+        return f"deallocevict, desc=\"Deallocate cache block before completion ack for eviction request.\"{temp_h.end}"

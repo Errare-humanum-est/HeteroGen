@@ -54,7 +54,3 @@ class GenMachineActions:
         # Must match action_recycle_port.sm template
         return f"pop{port_name}"
 
-    @staticmethod
-    def get_recycle_action_name(port_name: str) -> str:
-        # Must match action_recycle_port.sm template
-        return f"recycle{port_name}"
