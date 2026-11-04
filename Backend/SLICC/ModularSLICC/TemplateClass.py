@@ -50,7 +50,14 @@ class TemplateHandler:
     # REPLACE DYNAMIC
     ####################################################################################################################
     def open_template(self, filename):
-        return re.sub(r'^#.*\n?', '', open(self.template_path + "/" + filename, "r").read(), flags=re.MULTILINE)
+        # For gem5 v20 a template of TempSLICC/<dir>_v20 replaces the one of TempSLICC/<dir>
+        from Backend.SLICC.ModularSLICC.BackendOptions import OPTIONS, GEM5_V23
+        path = self.template_path + "/" + filename
+        if OPTIONS.gem5 != GEM5_V23:
+            variant = os.path.normpath(self.template_path) + "_" + OPTIONS.gem5 + "/" + filename
+            if os.path.exists(variant):
+                path = variant
+        return re.sub(r'^#.*\n?', '', open(path, "r").read(), flags=re.MULTILINE)
 
     @staticmethod
     def string_repl_keys(ref_string, replace_keys):
@@ -67,16 +74,16 @@ class TemplateHandler:
         tab_string = self.tab * count
         return self.nl.join([tab_string + st for st in string.splitlines()])
 
-    @staticmethod
-    def test_int(string):
-        try:
-            int(string)
-            return True
-        except ValueError:
-            return False
+    def fix_tabs(self, string: str, base_ident=0):
+        current_level = base_ident
+        result = []
+        for s in string.splitlines():
+            s = s.strip()
+            if s.startswith("}"):
+                current_level -= 1
+            result.append((current_level * self.tab) + s)
+            if s.endswith("{"):
+                current_level += 1
 
-    @staticmethod
-    def test_operator(string):
-        if string.isalpha():
-            return True
-        return False
+        return self.nl.join(result)
+
