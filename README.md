@@ -1,4 +1,9 @@
 # HeteroGen
+
+The original SLICC backend work was performed by Nicolai Oswald and Theo Olausson at the University of Edinburgh and was used in the HeteroGen publication. Please cite:
+
+> N. Oswald, V. Nagarajan, D. J. Sorin, V. Gavrielatos, T. Olausson and R. Carr, "HeteroGen: Automatic Synthesis of Heterogeneous Cache Coherence Protocols," 2022 IEEE International Symposium on High-Performance Computer Architecture (HPCA), Seoul, Korea, Republic of, 2022, pp. 756-771, doi: 10.1109/HPCA53966.2022.00061.
+
 [HeteroGen Paper HPCA'22](https://github.com/Errare-humanum-est/HeteroGen/blob/4b461e10eb93145de129d942ca78a2b551eea3f7/HeteroGen%20HPCA22.pdf)
 
 ## Hardware dependencies
