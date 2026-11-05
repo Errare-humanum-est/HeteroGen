@@ -1,0 +1,8 @@
+  action(a_copyEntryToTBE, "cpTBE", desc="Copy Entry to TBE.") {
+    if (is_valid(cache_entry)) {
+      if (is_valid(tbe)) {
+          tbe.cl := cache_entry.cl;
+          tbe.dirty := true;
+      }
+    }
+  }

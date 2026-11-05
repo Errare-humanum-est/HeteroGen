@@ -1,0 +1,6 @@
+transition($0$, alloc$1$, $1$) {
+  allocEntry_instruction;
+  a_allocTBE;
+  $2$;
+  popmandatory_in;
+}

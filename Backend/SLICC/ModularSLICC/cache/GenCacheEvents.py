@@ -31,10 +31,10 @@
 
 from typing import List, Dict, Tuple
 from collections import OrderedDict
-from DataObjects.Architecture.ClassBaseArchitecture import BaseArchitecture
 from Backend.SLICC.ModularSLICC.TemplateClass import TemplateHandler
 from Backend.SLICC.ModularSLICC.common.GenMachineEvents import GenMachineEvents
 from Backend.SLICC.ModularSLICC.common import Util
+from DataObjects.Architecture.ClassFlatArchitecture import FlatArchitecture
 
 
 class GenCacheEvents(TemplateHandler):
@@ -43,7 +43,7 @@ class GenCacheEvents(TemplateHandler):
     def __init__(self, handler_dir: str):
         TemplateHandler.__init__(self, handler_dir)
 
-    def gen_cache_events_str(self, arch: BaseArchitecture, in_ports: 'OrderedDict[str, str]') -> str:
+    def gen_cache_events_str(self, arch: FlatArchitecture, in_ports: 'OrderedDict[str, str]') -> str:
 
         const_str = "//" + __name__ + self.nl
         event_strs = self.gen_local_hit_events(Util.get_local_hit_events(arch))
@@ -55,6 +55,13 @@ class GenCacheEvents(TemplateHandler):
                               f"following a message received on {port}.\"{self.sem}")
             event_strs.append(GenMachineEvents.gen_stall_event(self, port))
 
+        for (access, start_state), (end_state, event_name) in sorted(Util.get_direct_access_events(arch).items()):
+            event_strs.append(f"{event_name}, desc=\"{start_state}->{end_state} upon {access}, sent on without "
+                              f"waiting for a reply.\"{self.sem}")
+        if Util.silent_victim_states(arch):
+            event_strs.append(f"deallocmandatory_in, desc=\"Event indicating the cache line + tbe of a victim "
+                              f"evicted without a message should be deallocated.\"{self.sem}")
+
         next_states = {str(state) for state in Util.get_states_following_invalid_states(arch)}
         for next_state in sorted(next_states):
             event_strs.append(f"alloc{next_state}, "
@@ -62,6 +69,7 @@ class GenCacheEvents(TemplateHandler):
                               )
 
         event_strs.append(GenMachineEvents.gen_tbe_alloc_event(self))
+        event_strs.append(GenMachineEvents.silent_evict_event(self))
         event_strs.append(GenMachineEvents.gen_tbe_dealloc_event(self))
         event_strs.append(GenMachineEvents.gen_progress_event(self))
 

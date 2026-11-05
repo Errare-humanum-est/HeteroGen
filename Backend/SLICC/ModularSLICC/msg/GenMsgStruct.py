@@ -29,10 +29,10 @@
 #
 #
 
-from DataObjects.ClassCluster import Cluster
 from Backend.SLICC.ModularSLICC.TemplateClass import TemplateHandler
 from Backend.SLICC.ModularSLICC.common import Util
 from Backend.SLICC.ModularSLICC import SLICCTokens
+from DataObjects.Architecture.ClassGlobalBaseArchitecture import GlobalBaseArchitecture
 
 
 class GenMsgStruct(TemplateHandler):
@@ -42,23 +42,23 @@ class GenMsgStruct(TemplateHandler):
     def __init__(self, handler_dir: str):
         TemplateHandler.__init__(self, handler_dir)
 
-    def gen_msg_struct_str(self, cluster: Cluster):
+    def gen_msg_struct_str(self, arch: GlobalBaseArchitecture):
         const_str = "//" + __name__ + self.nl
         variables = {}
-
-        for global_arch in cluster.get_global_architectures():
-            for msg_type in global_arch.network.msg_types.values():
-                variables.update(msg_type.msg_vars)
+        for msg_type in arch.network.msg_types.values():
+            variables.update(msg_type.msg_vars)
 
         body = ""
         for var, var_type_tree in variables.items():
             method_fct = SLICCTokens.data_type_map[str(var_type_tree)]
             method = getattr(self, method_fct, lambda: '_pass_node')
             body += f"{self.tab}{method(var)}"
+        if Util.partial_messages(arch):
+            body += f"{self.tab}{SLICCTokens.st_write_mask} {SLICCTokens.write_mask}, " \
+                    f"desc=\"Bytes written by a store of release-consistency code (partial messages)\"{self.end}"
 
-        # NOTE/TODO just like GenMachInPorts.py, we need to know which Data object functional reads and writes
-        # operate on. Therefore, assuming the message types declare PRECISELY ONE DATA OBJECT
-        data_var = Util.get_message_data_var(cluster)
+        # functional reads and writes use the message's data: every message type declares exactly one
+        data_var = Util.get_message_data_var(arch)
 
         const_str += self.string_repl_keys(self.open_template(GenMsgStruct.template_file), [body, data_var])
         return const_str
@@ -79,7 +79,7 @@ class GenMsgStruct(TemplateHandler):
         return f"int {var}, desc=\"Integer {var}\"{self.end}"
 
     def _gen_bool(self, var: str) -> str:
-        raise NotImplementedError
+        return f"bool {var}, desc=\"Boolean {var}\"{self.end}"
 
     def _gen_msg(self, var: str) -> str:
         raise NotImplementedError

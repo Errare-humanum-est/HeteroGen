@@ -1,9 +1,10 @@
-machine(MachineType:L1Cache, "Cache controller")
+machine(MachineType:$0$, "Cache controller")
 : Sequencer *sequencer;
   CacheMemory *cache;
+  CacheMemory *cache_instruction;
   bool send_evictions;
+  int $1$_id;
 
-  // The following latencies should be exposed as command-line parameters in a future update
   Cycles responseLatency := 1;
   Cycles recycleLatency := 10;
 
@@ -11,6 +12,6 @@ machine(MachineType:L1Cache, "Cache controller")
   MessageBuffer *mandatoryQueue;
 
   // Dynamic networks
-  $0$
+  $2$
 
 {

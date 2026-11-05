@@ -1,0 +1,4 @@
+transition($0$, deallocevict) {
+    a_copyEntryToTBE;
+    deallocEntry;
+}

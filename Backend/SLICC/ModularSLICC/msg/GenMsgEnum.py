@@ -29,8 +29,8 @@
 #
 #
 
-from DataObjects.ClassCluster import Cluster
 from Backend.SLICC.ModularSLICC.TemplateClass import TemplateHandler
+from DataObjects.Architecture.ClassGlobalBaseArchitecture import GlobalBaseArchitecture
 
 
 class GenMsgEnum(TemplateHandler):
@@ -40,13 +40,9 @@ class GenMsgEnum(TemplateHandler):
     def __init__(self, handler_dir: str):
         TemplateHandler.__init__(self, handler_dir)
 
-    def gen_msg_enum_str(self, cluster: Cluster):
+    def gen_msg_enum_str(self, arch: GlobalBaseArchitecture):
         body_strs = []
-        msg_type_set = set()
-        for global_arch in cluster.get_global_architectures():
-            msg_type_set.update(global_arch.network.base_message_dict.keys())
-
-        for msg_type in msg_type_set:
+        for msg_type in sorted(arch.network.base_message_dict.keys()):
             body_strs.append(f"{self.tab}{msg_type}, desc=\"{msg_type}\"{self.sem}")
         return "//" + __name__ + self.nl \
                     + self.string_repl_keys(self.open_template(self.template_file), [self.nl.join(body_strs)])

@@ -1,0 +1,9 @@
+action(local_ntstoreHit, "lnSh", desc="Callback local hit of a store of release-consistency code.") {
+  // The sequencer does not write the bytes of an ST_NT/ST_REL into the block
+  assert(is_valid(cache_entry));
+  peek(mandatory_in, RubyRequest) {
+    writeRCData(tbe, cache_entry, address, in_msg.WTData, in_msg.writeMask);
+  }
+  cache.setMRU(cache_entry);
+  sequencer.writeCallback(address, cache_entry.$0$, false);
+}

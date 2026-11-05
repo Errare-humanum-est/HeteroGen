@@ -29,9 +29,9 @@
 #
 #
 
-from DataObjects.Architecture.ClassBaseArchitecture import BaseArchitecture
 from Backend.SLICC.ModularSLICC.TemplateClass import TemplateHandler
 from Backend.SLICC.ModularSLICC.common.GenMachineHeader import GenMachineHeader
+from DataObjects.Architecture.ClassFlatArchitecture import FlatArchitecture
 
 
 class GenDirHeader(TemplateHandler):
@@ -41,7 +41,7 @@ class GenDirHeader(TemplateHandler):
     def __init__(self, handler_dir: str):
         TemplateHandler.__init__(self, handler_dir)
 
-    def gen_dir_header_str(self, arch: BaseArchitecture):
+    def gen_dir_header_str(self, arch: FlatArchitecture, machine_mappings: dict[str, str]):
         constr_str = "//" + __name__ + self.nl
-        constr_str += GenMachineHeader.gen_machine_header_str(self, arch, GenDirHeader.template_file, True)
+        constr_str += GenMachineHeader.gen_machine_header_str(self, arch, machine_mappings, GenDirHeader.template_file, True)
         return constr_str + self.nl

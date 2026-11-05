@@ -1,0 +1,14 @@
+  action(remote_ifetchHit, "rih", desc="Callback remote load hit.") {
+    // Signal to gem5 that this load/read access was a hit remotely
+    // (i.e. was satisfied through the coherence interface)
+    assert(is_valid(cache_entry));
+
+     if (is_valid(cache.lookup(address))){
+             cache.setMRU(cache_entry);
+      } else if (is_valid(cache_instruction.lookup(address))) {
+              cache_instruction.setMRU(cache_entry);
+      }
+
+
+    sequencer.readCallback(address, cache_entry.cl, true);
+  }

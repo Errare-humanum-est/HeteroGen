@@ -32,6 +32,7 @@
 from collections import OrderedDict
 from Backend.SLICC.ModularSLICC.TemplateClass import TemplateHandler
 from Backend.SLICC.ModularSLICC.common.GenMachineOutPorts import GenMachineOutPorts
+from Backend.SLICC.ModularSLICC.BackendOptions import GEM5_V20, OPTIONS
 
 
 class GenDirOutPorts(TemplateHandler):
@@ -49,7 +50,8 @@ class GenDirOutPorts(TemplateHandler):
         return const_str + self.nl
 
     def _gen_mem_out_port(self) -> str:
-        # TODO gen_make tokens of the hardcoded strings everywhere... that's for another day though
+        if OPTIONS.gem5 == GEM5_V20:
+            return ""  # gem5 v20: memory requests through queueMemoryRead/Write (MEMORY_READ.sm)
         return self.string_repl_keys(self.open_template(GenDirOutPorts.template_file),
                                      ["memQueue_out", "MemoryMsg", "requestToMemory"]
                                      )

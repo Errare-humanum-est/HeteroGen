@@ -38,28 +38,30 @@ from Backend.SLICC.ModularSLICC.cache.GenCacheBase import GenCacheBase
 class ModularCache(GenCacheBase):
     TemplateDir = "TempSLICC/machines"
 
-    def __init__(self, cluster: Cluster, arch: FlatArchitecture, file_name: str):
+    def __init__(self, cluster: Cluster, arch: FlatArchitecture, file_name: str, id_mapping: dict[str, str], cache_id: None | int = None):
         GenCacheBase.__init__(self, self.TemplateDir)
 
-        file_name = file_name.split(".")[0] + "_cache.sm"
+        file_name = file_name.split(".")[0] + f"_cache{cache_id or ''}_synth.sm"
 
-        out_ports = Util.get_out_ports(arch)
-        in_ports = Util.get_in_ports(arch)
+        out_ports = Util.get_out_ports(arch, True)
+        in_ports = Util.get_in_ports(arch, True)
+
+        machine_id = id_mapping[str(arch)]
 
         with open(file_name, "w") as slicc_file:
             # Write header
-            slicc_file.write(self.gen_cache_header_str(arch))
+            slicc_file.write(self.gen_cache_header_str(arch, id_mapping))
             # Write (indented) body
             slicc_file.write(
                 self.add_tabs(
-                    ''.join([self.gen_cache_state_decl_str(arch) + self.nl,
+                    ''.join([self.gen_cache_state_decl_str(arch, machine_id) + self.nl,
                              self.gen_cache_events_str(arch, in_ports) + self.nl,
                              self.gen_cache_struct_str(arch) + self.nl,
-                             self.gen_cache_tbe_str(arch) + self.nl,
-                             self.gen_cache_static_fns_str(arch) + self.nl,
+                             self.gen_cache_tbe_str(arch, machine_id) + self.nl,
+                             self.gen_cache_static_fns_str(arch, machine_id) + self.nl,
                              self.gen_cache_out_ports_str(out_ports) + self.nl,
-                             self.gen_cache_in_ports_str(cluster, arch, in_ports, out_ports) + self.nl,
-                             self.gen_cache_actions_str(cluster, arch, in_ports, out_ports) + self.nl,
+                             self.gen_cache_in_ports_str(cluster, arch, in_ports, out_ports, id_mapping) + self.nl,
+                             self.gen_cache_actions_str(cluster, arch, in_ports, out_ports, id_mapping) + self.nl,
                              self.gen_cache_transitions_str(arch, in_ports),
                              ]
                             ),

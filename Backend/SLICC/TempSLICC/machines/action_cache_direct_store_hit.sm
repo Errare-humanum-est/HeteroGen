@@ -1,0 +1,9 @@
+action(direct_storeHit, "dSh", desc="Callback of a store sent on without waiting for a reply.") {
+  if (is_valid(cache_entry)) {
+    cache.setMRU(cache_entry);
+    sequencer.writeCallback(address, cache_entry.$0$, false);
+  } else {
+    // no copy in the cache: the bytes are in the TBE
+    sequencer.writeCallback(address, tbe.$0$, false);
+  }
+}

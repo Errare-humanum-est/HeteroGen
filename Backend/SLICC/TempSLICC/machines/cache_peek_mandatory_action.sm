@@ -1,4 +1,4 @@
-action($0$, $1$, desc="TODO") {
+action($0$, $1$, desc="$0$") {
   peek(mandatory_in, RubyRequest) {
 $2$
   }

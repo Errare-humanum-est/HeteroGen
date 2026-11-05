@@ -1,0 +1,9 @@
+
+  // The bytes of a store of release-consistency code (ST_NT, ST_REL), which the sequencer does not
+  // write into the block. Without a copy in the cache they travel in the TBE.
+  void writeRCData(TBE tbe, Entry cache_entry, Addr LineAddress, DataBlock data, WriteMask mask) {
+    if (is_invalid(cache_entry)) {
+      tbe.dirty := true;
+    }
+    mergeCacheBlock(tbe, cache_entry, LineAddress, data, mask);
+  }

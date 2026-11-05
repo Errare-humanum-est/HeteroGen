@@ -32,9 +32,9 @@
 from typing import List
 from collections import OrderedDict
 
-from DataObjects.Architecture.ClassBaseArchitecture import BaseArchitecture
 from Backend.SLICC.ModularSLICC.TemplateClass import TemplateHandler
 from Backend.SLICC.ModularSLICC.common.GenMachineTransitions import GenMachineTransitions
+from DataObjects.Architecture.ClassFlatArchitecture import FlatArchitecture
 
 
 class GenDirTransitions(TemplateHandler):
@@ -43,11 +43,9 @@ class GenDirTransitions(TemplateHandler):
         TemplateHandler.__init__(self, handler_dir)
 
     def gen_dir_transitions_str(
-            self, arch: BaseArchitecture, main_mem_induced_states: List[str], in_ports: 'OrderedDict[str, str]') -> str:
+            self, arch: FlatArchitecture, main_mem_induced_states: List[str], in_ports: 'OrderedDict[str, str]') -> str:
 
-        stable_states = {str(state) for state in arch.stable_states}
-        stable_states_str = f"{{{', '.join(stable_states)}}}"
-        all_states = [str(state) for state in arch.get_architecture_states_verified()]
+        all_states = sorted([str(state) for state in arch.get_architecture_states_verified()])
         all_states_str = f"{{{', '.join(all_states)}}}"
 
         ports = list(in_ports.values())
@@ -60,7 +58,7 @@ class GenDirTransitions(TemplateHandler):
 
         progress_str = GenMachineTransitions.gen_progress_transition(
             self,
-            [str(state) for state in arch.get_architecture_states_verified()] + main_mem_induced_states)
+            sorted([str(state) for state in arch.get_architecture_states_verified()] + main_mem_induced_states))
 
         return "//" + __name__ + self.nl \
                + (self.nl * 2).join(dealloc_trans_strs) + (self.nl * 2) \

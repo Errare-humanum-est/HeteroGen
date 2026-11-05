@@ -36,6 +36,8 @@ st_mach_id = "MachineID"
 st_net_dest = "NetDest"
 st_int = "int"
 st_data = "DataBlock"
+st_write_mask = "WriteMask"
+st_bool = "bool"
 
 # SLICC constant variable names
 k_in_msg = "in_msg"
@@ -79,6 +81,7 @@ set_func_map = {
     'contains': '_gen_vector_contains',
     'empty': '_gen_vector_empty',
     'count': '_gen_vector_count',
+    'smallest': '_gen_vector_smallest',
 }
 op_map = {
     ('==', False): '==',
@@ -100,8 +103,8 @@ access_map = {
     'store': 'write',
 }
 field_map = {
-    '.src': '.Sender',
-    '.dest': '.Destination',
+    'src': 'Sender',
+    'dest': 'Destination',
 }
 
 base_message_vars = {
@@ -109,3 +112,12 @@ base_message_vars = {
     "src": ProtoParserBase.t_id,
     "dst": ProtoParserBase.t_id,
 }
+
+proxy_key_fields = {
+    "src": ProtoParserBase.t_id,
+    # "exclusiveL1": ProtoParserBase.t_bool,
+}
+
+# Write mask of a partial message (Util.partial_messages): field of CoherenceMessage and of the
+# deferred request of a proxy
+write_mask = "writeMask"

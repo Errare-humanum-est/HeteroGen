@@ -31,16 +31,17 @@
 
 from typing import List
 from antlr3.tree import CommonTree
-from DataObjects.Architecture.ClassBaseArchitecture import BaseArchitecture
-from Parser.ProtoCCcomTreeFct import objListToStringList
 from Backend.SLICC.ModularSLICC import SLICCTokens
 from Backend.SLICC.ModularSLICC.TemplateClass import TemplateHandler
+from DataObjects.Architecture.ClassFlatArchitecture import FlatArchitecture
+from Backend.SLICC.ModularSLICC.common import Util
+from Parser.NetworkxParser.ClassProtoParserBase import ProtoParserBase
 
 
 class GenMachineStruct:
 
     @staticmethod
-    def gen_machine_struct_body_str(temp_h: TemplateHandler, arch: BaseArchitecture) -> str:
+    def gen_machine_struct_body_str(temp_h: TemplateHandler, arch: FlatArchitecture) -> str:
         body_strs = []
         for variable in arch.machine.variables.values():
             # TODO this basic version does not track GlobalInit a la Murphi backend...
@@ -49,7 +50,7 @@ class GenMachineStruct:
             # For now, only generating the structure entry itself
             method_fct = SLICCTokens.data_type_map.get(variable.getText(), '_pass_node')
             method = getattr(GenMachineStruct, method_fct)
-            res = method(variable)
+            res = method(variable, arch)
             if res:
                 body_strs.append(temp_h.tab + res)
 
@@ -60,45 +61,56 @@ class GenMachineStruct:
     ####################################################################################################################
 
     @staticmethod
-    def _pass_node(definition: CommonTree) -> bool:
+    def _pass_node(definition: CommonTree, arch: FlatArchitecture) -> bool:
         return False
 
     @staticmethod
-    def _set_init_state(definition: CommonTree) -> bool:
+    def _set_init_state(definition: CommonTree, arch: FlatArchitecture) -> bool:
         # The initial state has already been generated in [GenDirStateDecl]
         return False
 
     @staticmethod
-    def _gen_cache_line(definition: CommonTree) -> str:
+    def _gen_cache_line(definition: CommonTree, arch: FlatArchitecture) -> str:
         tokens = definition.getChildren()
-        return f"{SLICCTokens.st_data} {tokens[-1].getText()}, desc=\"... TODO ...\";"
+        return f"{SLICCTokens.st_data} {tokens[-1].getText()};"
 
     @staticmethod
-    def _gen_identifier(definition: CommonTree) -> str:
+    def _gen_identifier(definition: CommonTree, arch: FlatArchitecture) -> str:
         tokens = definition.getChildren()
         if len(tokens) > 1:
             return GenMachineStruct._gen_net_dest(tokens)
         else:
 
-            return f"{SLICCTokens.st_mach_id} {tokens[-1].getText()}, desc=\"... TODO ...\";"
+            return f"{SLICCTokens.st_mach_id} {tokens[-1].getText()};"
 
     @staticmethod
     def _gen_net_dest(tokens: List[CommonTree]) -> str:
         # For now, assuming only using sets to refer to other machines
-        return f"{SLICCTokens.st_net_dest} {tokens[0].getText()}, desc=\"... TODO ...\";"
+        return f"{SLICCTokens.st_net_dest} {tokens[0].getText()};"
 
     @staticmethod
-    def _gen_int(definition: CommonTree) -> str:
+    def _gen_int(definition: CommonTree, arch: FlatArchitecture) -> str:
         # Unlike Murphi, SLICC is not a verification engine and therefore does not
         # require ints to be bounded
         tokens = definition.getChildren()
-        return f"{SLICCTokens.st_int} {tokens[0].getText()}, default={tokens[-1].children[0].getText()}, " \
-               "desc=\"...TODO...\";"
+        return f"{SLICCTokens.st_int} {tokens[0].getText()}, default={tokens[-1].children[0].getText()};"
 
     @staticmethod
-    def _gen_bool(definition: CommonTree) -> str:
+    def _gen_bool(definition: CommonTree, arch: FlatArchitecture) -> str:
         raise NotImplementedError
 
     @staticmethod
-    def _gen_msg(definition: CommonTree) -> str:
-        return "".join(objListToStringList([definition]))
+    def _gen_msg(definition: CommonTree, arch: FlatArchitecture) -> str:
+        if str(definition.getChildren()[0]) in getattr(arch, "proxy_keys", {}).values():
+            result = ""
+            slicc_types = {ProtoParserBase.t_id: SLICCTokens.st_mach_id,
+                           ProtoParserBase.t_bool: SLICCTokens.st_bool,
+                           ProtoParserBase.t_int: SLICCTokens.st_int,
+                           ProtoParserBase.t_data: SLICCTokens.st_data,
+                           SLICCTokens.st_write_mask: SLICCTokens.st_write_mask}
+            for m_name, m_type in Util.proxy_key_fields(arch, str(definition.getChildren()[0])).items():
+                if len(result) > 0:
+                    result += "\n"
+                result += f"{slicc_types[m_type]} {str(definition.getChildren()[0])}_{m_name};"
+            return result
+        raise NotImplementedError

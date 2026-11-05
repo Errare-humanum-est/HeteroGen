@@ -29,9 +29,9 @@
 #
 #
 
-from DataObjects.Architecture.ClassBaseArchitecture import BaseArchitecture
 from Backend.SLICC.ModularSLICC.TemplateClass import TemplateHandler
 from Backend.SLICC.ModularSLICC.common.GenMachineStateDecl import GenMachineStateDecl
+from DataObjects.Architecture.ClassFlatArchitecture import FlatArchitecture
 
 
 class GenCacheStateDecl(TemplateHandler):
@@ -40,11 +40,11 @@ class GenCacheStateDecl(TemplateHandler):
     def __init__(self, handler_dir: str):
         TemplateHandler.__init__(self, handler_dir)
 
-    def gen_cache_state_decl_str(self, arch: BaseArchitecture) -> str:
+    def gen_cache_state_decl_str(self, arch: FlatArchitecture, machine_id: str) -> str:
         const_str = "//" + __name__ + self.nl
-        state_declaration_body = GenMachineStateDecl.gen_machine_state_decl_body_str(self, arch)
+        state_declaration_body = GenMachineStateDecl.gen_machine_state_decl_body_str(self, arch, True)
         init_state = str(arch.init_state)
         const_str += self.string_repl_keys(self.open_template(GenCacheStateDecl.template_file),
-                                           ["L1Cache", init_state, state_declaration_body]
+                                           [machine_id, init_state, state_declaration_body]
                                            )
         return const_str + self.nl

@@ -1,0 +1,9 @@
+action(direct_loadHit, "dLh", desc="Callback of a load sent on without waiting for a reply.") {
+  // a non-temporal load: the sequencer discards the value
+  if (is_valid(cache_entry)) {
+    cache.setMRU(cache_entry);
+    sequencer.readCallback(address, cache_entry.$0$, false);
+  } else {
+    sequencer.readCallback(address, tbe.$0$, false);
+  }
+}
