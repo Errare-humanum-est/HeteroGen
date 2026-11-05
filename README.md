@@ -1,10 +1,30 @@
 # HeteroGen
 
-The original SLICC backend work was performed by Nicolai Oswald and Theo Olausson at the University of Edinburgh and was used in the HeteroGen publication. Please cite:
+The current SLICC backend in this repo was developed in corporation of Nicolai Oswald, Theo Olausson, Nicolo Carpentieri, Anatole Lefort, David Schall and Julian Pritzi.
 
-> N. Oswald, V. Nagarajan, D. J. Sorin, V. Gavrielatos, T. Olausson and R. Carr, "HeteroGen: Automatic Synthesis of Heterogeneous Cache Coherence Protocols," 2022 IEEE International Symposium on High-Performance Computer Architecture (HPCA), Seoul, Korea, Republic of, 2022, pp. 756-771, doi: 10.1109/HPCA53966.2022.00061.
+If you use the SLICC backend please cite the following publications:
 
-[HeteroGen Paper HPCA'22](https://github.com/Errare-humanum-est/HeteroGen/blob/4b461e10eb93145de129d942ca78a2b551eea3f7/HeteroGen%20HPCA22.pdf)
+@INPROCEEDINGS{9773254,
+  author={Oswald, Nicolai and Nagarajan, Vijay and Sorin, Daniel J. and Gavrielatos, Vasilis and Olausson, Theo and Carr, Reece},
+  booktitle={2022 IEEE International Symposium on High-Performance Computer Architecture (HPCA)}, 
+  title={HeteroGen: Automatic Synthesis of Heterogeneous Cache Coherence Protocols}, 
+  year={2022},
+  volume={},
+  number={},
+  pages={756-771},
+  keywords={Protocols;Program processors;Fuses;Computational modeling;Coherence;Computer architecture;Manuals;Cache coherence;Memory consistency;Compound consistency;Protocol design automation;Compositional consistency;Litmus tests;Heterogenous coherence protocols},
+  doi={10.1109/HPCA53966.2022.00061}}
+
+@inproceedings{carpentieri2026synapse,
+  title     = {Decoupling Protocol, Topology, and Policy for
+               Automated Synthesis of Coherence Controllers},
+  author    = {Carpentieri, Nicolo and Lefort, Anatole and Schall, David
+               and Pritzi, Julian and Bhatotia, Pramod},
+  booktitle = {Proceedings of the 59th IEEE/ACM International
+               Symposium on Microarchitecture (MICRO)},
+  year      = {2026},
+  address   = {Athens, Greece}
+}
 
 ## Hardware dependencies
 
